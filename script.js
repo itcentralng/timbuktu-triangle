@@ -13,7 +13,8 @@
     screen: 'attract',
     aboutIndex: 0,
     newsArticles: null,
-    newsLoaded: false
+    newsLoaded: false,
+    currentArticle: null
   };
 
   var el = {}; // populated in init()
@@ -36,29 +37,29 @@
   // Minimal fallback so the News section is never empty while the
   // background fetch job (data/news-articles.json) hasn't landed yet.
   var NEWS_FALLBACK = [
-    { id: 'tvc-1', operation: 'V', outlet: 'TVC News', outletAccentColor: '#0f4c8c', url: 'https://www.tvcnews.tv/troops-bust-terrorist-camps-thwart-attacks-in-northeast-operation/', headline: 'Troops Bust Terrorist Camps, Thwart Attacks In Northeast Operation', body: [], fetchFailed: true },
-    { id: 'zagazola-1', operation: 'V', outlet: 'Zagazola Makama', outletAccentColor: '#1a1a1a', url: 'https://zagazola.org/index.php/breaking-news/troops-dismantle-three-boko-haram-detention-facilities-in-timbuktu-triangle', headline: 'Troops Dismantle Three Boko Haram Detention Facilities In Timbuktu Triangle', body: [], fetchFailed: true },
-    { id: 'vanguard-1', operation: 'V', outlet: 'Vanguard', outletAccentColor: '#c8102e', url: 'https://www.vanguardngr.com/2026/01/troops-clear-terrorists-camps-in-timbuktu-triangle-thwarts-boko-haram-attacks/', headline: 'Troops Clear Terrorists Camps In Timbuktu Triangle, Thwarts Boko Haram Attacks', body: [], fetchFailed: true },
-    { id: 'vanguard-2', operation: 'V', outlet: 'Vanguard', outletAccentColor: '#c8102e', url: 'https://www.vanguardngr.com/2026/01/troops-gain-into-timbuktu-traingle-stronghold-of-boko-haram-iswap-terrorists/', headline: 'Troops Gain Into Timbuktu Triangle Stronghold Of Boko Haram/ISWAP Terrorists', body: [], fetchFailed: true },
-    { id: 'zagazola-2', operation: 'V', outlet: 'Zagazola Makama', outletAccentColor: '#1a1a1a', url: 'https://zagazola.org/index.php/breaking-news/iswap-suffers-heavy-losses-in-timbuktu-triangle-lost-22-fighters-in-encounter-with-troops', headline: 'ISWAP Suffers Heavy Losses In Timbuktu Triangle, Lost 22 Fighters In Encounter With Troops', body: [], fetchFailed: true },
-    { id: 'prnigeria-1', operation: 'V', outlet: 'PRNigeria', outletAccentColor: '#0b6e4f', url: 'https://prnigeria.com/2026/04/29/troops-pound-terrorists/', headline: 'Troops Pound Terrorists', body: [], fetchFailed: true },
-    { id: 'trt-1', operation: 'V', outlet: 'TRT World', outletAccentColor: '#c8102e', url: 'https://www.trtworld.com/article/d08074fe29dc', headline: 'Nigerian Troops Advance In Timbuktu Triangle Operation', body: [], fetchFailed: true },
-    { id: 'guardian-1', operation: 'V', outlet: 'The Guardian Nigeria', outletAccentColor: '#003876', url: 'https://guardian.ng/news/army-troops-overrun-boko-haram-iswap-stronghold-in-timbuktu-triangle/', headline: 'Army Troops Overrun Boko Haram/ISWAP Stronghold In Timbuktu Triangle', body: [], fetchFailed: true },
-    { id: 'thisday-1', operation: 'V', outlet: 'ThisDay', outletAccentColor: '#7a1f2b', url: 'https://www.thisdaylive.com/2026/01/21/troops-eliminate-20-terrorists-as-soldiers-pay-supreme-price-during-fierce-encounter/', headline: 'Troops Eliminate 20 Terrorists As Soldiers Pay Supreme Price During Fierce Encounter', body: [], fetchFailed: true },
-    { id: 'punch-1', operation: 'V', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'https://punchng.com/military-discovers-bharam-underground-storage-fuel-dump/', headline: 'Military Discovers Boko Haram Underground Storage, Fuel Dump', body: [], fetchFailed: true },
+    { id: 'tvc-1', operation: 'V', outlet: 'TVC News', outletAccentColor: '#0f4c8c', url: 'https://www.tvcnews.tv/troops-bust-terrorist-camps-thwart-attacks-in-northeast-operation/', headline: 'Troops Bust Terrorist Camps, Thwart Attacks In Northeast Operation', i18n: { fr: { headline: 'Les troupes démantèlent des camps terroristes et déjouent des attaques dans le cadre de l\'opération du Nord-Est' }, ar: { headline: 'القوات تدمر معسكرات إرهابية وتحبط هجمات في عملية شمال شرق نيجيريا' } }, body: [], fetchFailed: true },
+    { id: 'zagazola-1', operation: 'V', outlet: 'Zagazola Makama', outletAccentColor: '#1a1a1a', url: 'https://zagazola.org/index.php/breaking-news/troops-dismantle-three-boko-haram-detention-facilities-in-timbuktu-triangle', headline: 'Troops Dismantle Three Boko Haram Detention Facilities In Timbuktu Triangle', i18n: { fr: { headline: 'Les troupes démantèlent trois centres de détention de Boko Haram dans le Triangle de Timbuktu' }, ar: { headline: 'القوات تفكك ثلاثة مرافق احتجاز تابعة لبوكو حرام في مثلث تمبكتو' } }, body: [], fetchFailed: true },
+    { id: 'vanguard-1', operation: 'V', outlet: 'Vanguard', outletAccentColor: '#c8102e', url: 'https://www.vanguardngr.com/2026/01/troops-clear-terrorists-camps-in-timbuktu-triangle-thwarts-boko-haram-attacks/', headline: 'Troops Clear Terrorists Camps In Timbuktu Triangle, Thwarts Boko Haram Attacks', i18n: { fr: { headline: 'Les troupes nettoient des camps terroristes dans le Triangle de Timbuktu et déjouent des attaques de Boko Haram' }, ar: { headline: 'القوات تطهر معسكرات إرهابية في مثلث تمبكتو وتحبط هجمات بوكو حرام' } }, body: [], fetchFailed: true },
+    { id: 'vanguard-2', operation: 'V', outlet: 'Vanguard', outletAccentColor: '#c8102e', url: 'https://www.vanguardngr.com/2026/01/troops-gain-into-timbuktu-traingle-stronghold-of-boko-haram-iswap-terrorists/', headline: 'Troops Gain Into Timbuktu Triangle Stronghold Of Boko Haram/ISWAP Terrorists', i18n: { fr: { headline: 'Les troupes progressent dans le bastion de Boko Haram/ISWAP au Triangle de Timbuktu' }, ar: { headline: 'القوات تحرز تقدمًا داخل معقل بوكو حرام/داعش غرب أفريقيا في مثلث تمبكتو' } }, body: [], fetchFailed: true },
+    { id: 'zagazola-2', operation: 'V', outlet: 'Zagazola Makama', outletAccentColor: '#1a1a1a', url: 'https://zagazola.org/index.php/breaking-news/iswap-suffers-heavy-losses-in-timbuktu-triangle-lost-22-fighters-in-encounter-with-troops', headline: 'ISWAP Suffers Heavy Losses In Timbuktu Triangle, Lost 22 Fighters In Encounter With Troops', i18n: { fr: { headline: 'L\'ISWAP subit de lourdes pertes dans le Triangle de Timbuktu, 22 combattants tués lors d\'un affrontement avec les troupes' }, ar: { headline: 'داعش غرب أفريقيا يتكبد خسائر فادحة في مثلث تمبكتو ويفقد 22 مقاتلاً في اشتباك مع القوات' } }, body: [], fetchFailed: true },
+    { id: 'prnigeria-1', operation: 'V', outlet: 'PRNigeria', outletAccentColor: '#0b6e4f', url: 'https://prnigeria.com/2026/04/29/troops-pound-terrorists/', headline: 'Troops Pound Terrorists', i18n: { fr: { headline: 'Les troupes pilonnent les terroristes' }, ar: { headline: 'القوات تقصف الإرهابيين' } }, body: [], fetchFailed: true },
+    { id: 'trt-1', operation: 'V', outlet: 'TRT World', outletAccentColor: '#c8102e', url: 'https://www.trtworld.com/article/d08074fe29dc', headline: 'Nigerian Troops Advance In Timbuktu Triangle Operation', i18n: { fr: { headline: 'Les troupes nigérianes avancent dans l\'opération du Triangle de Timbuktu' }, ar: { headline: 'القوات النيجيرية تتقدم في عملية مثلث تمبكتو' } }, body: [], fetchFailed: true },
+    { id: 'guardian-1', operation: 'V', outlet: 'The Guardian Nigeria', outletAccentColor: '#003876', url: 'https://guardian.ng/news/army-troops-overrun-boko-haram-iswap-stronghold-in-timbuktu-triangle/', headline: 'Army Troops Overrun Boko Haram/ISWAP Stronghold In Timbuktu Triangle', i18n: { fr: { headline: 'Les troupes de l\'armée envahissent un bastion de Boko Haram/ISWAP dans le Triangle de Timbuktu' }, ar: { headline: 'قوات الجيش تجتاح معقلاً لبوكو حرام/داعش غرب أفريقيا في مثلث تمبكتو' } }, body: [], fetchFailed: true },
+    { id: 'thisday-1', operation: 'V', outlet: 'ThisDay', outletAccentColor: '#7a1f2b', url: 'https://www.thisdaylive.com/2026/01/21/troops-eliminate-20-terrorists-as-soldiers-pay-supreme-price-during-fierce-encounter/', headline: 'Troops Eliminate 20 Terrorists As Soldiers Pay Supreme Price During Fierce Encounter', i18n: { fr: { headline: 'Les troupes éliminent 20 terroristes alors que des soldats paient le prix ultime lors d\'un affrontement féroce' }, ar: { headline: 'القوات تقضي على 20 إرهابيًا فيما دفع الجنود الثمن الأغلى خلال اشتباك عنيف' } }, body: [], fetchFailed: true },
+    { id: 'punch-1', operation: 'V', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'https://punchng.com/military-discovers-bharam-underground-storage-fuel-dump/', headline: 'Military Discovers Boko Haram Underground Storage, Fuel Dump', i18n: { fr: { headline: 'L\'armée découvre un dépôt souterrain de stockage et de carburant de Boko Haram' }, ar: { headline: 'الجيش يكتشف مستودعًا تحت الأرض ومخزن وقود تابعًا لبوكو حرام' } }, body: [], fetchFailed: true },
 
-    { id: 'arise-1', operation: 'IV', outlet: 'Arise News', outletAccentColor: '#e2001a', url: 'https://www.arise.tv/boko-haram-swap-attack-kills-army-commander-soldiers-in-borno-state/', headline: 'Boko Haram/ISWAP Attack Kills Army Commander, Soldiers In Borno State', body: [], fetchFailed: true },
-    { id: 'hindu-1', operation: 'IV', outlet: 'The Hindu', outletAccentColor: '#004b8d', url: 'https://www.thehindu.com/news/international/at-least-27-nigerian-soldiers-killed-in-jihadist-suicide-attack-army/article69144242.ece', headline: 'At Least 27 Nigerian Soldiers Killed In Jihadist Suicide Attack: Army', body: [], fetchFailed: true },
-    { id: 'ndarason-1', operation: 'IV', outlet: 'Ndarason Media', outletAccentColor: '#1a1a1a', url: 'https://ndarason.com/en/at-least-70-insurgents-killed-in-timbuktu-triangle-in-borno-state/', headline: 'At Least 70 Insurgents Killed In Timbuktu Triangle In Borno State', body: [], fetchFailed: true },
-    { id: 'punch-2', operation: 'IV', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'https://punchng.com/22-soldiers-over-70-insurgents-killed-in-borno-clash-dhq/', headline: '22 Soldiers, Over 70 Insurgents Killed In Borno Clash — DHQ', body: [], fetchFailed: true },
-    { id: 'thecable-1', operation: 'IV', outlet: 'The Cable', outletAccentColor: '#0a2540', url: 'https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/', headline: 'Nigerian Army Loses 20 Soldiers, Kills 70 Terrorists During Military Operation In Borno', body: [], fetchFailed: true },
-    { id: 'channelstv-1', operation: 'IV', outlet: 'Channels TV', outletAccentColor: '#00693e', url: 'https://www.channelstv.com/2025/01/26/military-confirms-death-on-22-soldiers-in-north-east-operation/', headline: 'Military Confirms Death Of 22 Soldiers In North-East Operation', body: [], fetchFailed: true },
-    { id: 'thecable-2', operation: 'IV', outlet: 'The Cable', outletAccentColor: '#0a2540', url: 'https://www.thecable.ng/newspaper-headlines-terrorists-ambush-soldiers-recovering-corpses-of-farmers-in-borno/', headline: 'Newspaper Headlines: Terrorists Ambush Soldiers Recovering Corpses Of Farmers In Borno', body: [], fetchFailed: true },
-    { id: 'punch-3', operation: 'IV', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'http://punchng.com/troops-kill-over-50-terrorists-in-borno-yobe-military/', headline: 'Troops Kill Over 50 Terrorists In Borno, Yobe — Military', body: [], fetchFailed: true },
-    { id: 'premiumtimes-1', operation: 'IV', outlet: 'Premium Times', outletAccentColor: '#0b3d91', url: 'https://www.premiumtimesng.com/news/headlines/799991-nigerian-troops-kill-iswap-commander-many-other-terrorists-in-borno-yobe-official.html', headline: 'Nigerian Troops Kill ISWAP Commander, Many Other Terrorists In Borno, Yobe — Official', body: [], fetchFailed: true },
-    { id: 'humangle-1', operation: 'IV', outlet: 'HumAngle', outletAccentColor: '#1f7a4d', url: 'https://humanglemedia.com/nigerian-military-confirms-22-soldiers-killed-in-ongoing-operations-against-terrorists/', headline: 'Nigerian Military Confirms 22 Soldiers Killed In Ongoing Operations Against Terrorists', body: [], fetchFailed: true },
-    { id: 'justicewatch-1', operation: 'IV', outlet: 'Justice Watch News', outletAccentColor: '#4a4a4a', url: 'https://justicewatchnews.com/nigeria-army-provides-update-on-terrorist-attack-on-troops-in-timbuktu-triangle/', headline: 'Nigeria Army Provides Update On Terrorist Attack On Troops In Timbuktu Triangle', body: [], fetchFailed: true },
-    { id: 'kwara-1', operation: 'IV', outlet: 'Kwara Reporters', outletAccentColor: '#1a1a1a', url: 'https://www.kwarareporters.com.ng/2025/01/three-officers-several-nigerian.html', headline: 'Three Officers, Several Nigerian Soldiers Killed In Borno Attack', body: [], fetchFailed: true }
+    { id: 'arise-1', operation: 'IV', outlet: 'Arise News', outletAccentColor: '#e2001a', url: 'https://www.arise.tv/boko-haram-swap-attack-kills-army-commander-soldiers-in-borno-state/', headline: 'Boko Haram/ISWAP Attack Kills Army Commander, Soldiers In Borno State', i18n: { fr: { headline: 'Une attaque de Boko Haram/ISWAP tue un commandant de l\'armée et des soldats dans l\'État de Borno' }, ar: { headline: 'هجوم لبوكو حرام/داعش غرب أفريقيا يقتل قائدًا عسكريًا وجنودًا في ولاية بورنو' } }, body: [], fetchFailed: true },
+    { id: 'hindu-1', operation: 'IV', outlet: 'The Hindu', outletAccentColor: '#004b8d', url: 'https://www.thehindu.com/news/international/at-least-27-nigerian-soldiers-killed-in-jihadist-suicide-attack-army/article69144242.ece', headline: 'At Least 27 Nigerian Soldiers Killed In Jihadist Suicide Attack: Army', i18n: { fr: { headline: 'Au moins 27 soldats nigérians tués dans un attentat-suicide djihadiste, selon l\'armée' }, ar: { headline: 'مقتل 27 جنديًا نيجيريًا على الأقل في هجوم انتحاري جهادي: الجيش' } }, body: [], fetchFailed: true },
+    { id: 'ndarason-1', operation: 'IV', outlet: 'Ndarason Media', outletAccentColor: '#1a1a1a', url: 'https://ndarason.com/en/at-least-70-insurgents-killed-in-timbuktu-triangle-in-borno-state/', headline: 'At Least 70 Insurgents Killed In Timbuktu Triangle In Borno State', i18n: { fr: { headline: 'Au moins 70 insurgés tués dans le Triangle de Timbuktu dans l\'État de Borno' }, ar: { headline: 'مقتل 70 متمردًا على الأقل في مثلث تمبكتو بولاية بورنو' } }, body: [], fetchFailed: true },
+    { id: 'punch-2', operation: 'IV', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'https://punchng.com/22-soldiers-over-70-insurgents-killed-in-borno-clash-dhq/', headline: '22 Soldiers, Over 70 Insurgents Killed In Borno Clash — DHQ', i18n: { fr: { headline: '22 soldats et plus de 70 insurgés tués lors d\'affrontements à Borno — QG de la Défense' }, ar: { headline: 'مقتل 22 جنديًا وأكثر من 70 متمردًا في اشتباكات بورنو — مقر الدفاع' } }, body: [], fetchFailed: true },
+    { id: 'thecable-1', operation: 'IV', outlet: 'The Cable', outletAccentColor: '#0a2540', url: 'https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/', headline: 'Nigerian Army Loses 20 Soldiers, Kills 70 Terrorists During Military Operation In Borno', i18n: { fr: { headline: 'L\'armée nigériane perd 20 soldats et tue 70 terroristes lors d\'une opération militaire à Borno' }, ar: { headline: 'الجيش النيجيري يفقد 20 جنديًا ويقتل 70 إرهابيًا خلال عملية عسكرية في بورنو' } }, body: [], fetchFailed: true },
+    { id: 'channelstv-1', operation: 'IV', outlet: 'Channels TV', outletAccentColor: '#00693e', url: 'https://www.channelstv.com/2025/01/26/military-confirms-death-on-22-soldiers-in-north-east-operation/', headline: 'Military Confirms Death Of 22 Soldiers In North-East Operation', i18n: { fr: { headline: 'L\'armée confirme la mort de 22 soldats lors d\'une opération dans le Nord-Est' }, ar: { headline: 'الجيش يؤكد مقتل 22 جنديًا في عملية بشمال شرق البلاد' } }, body: [], fetchFailed: true },
+    { id: 'thecable-2', operation: 'IV', outlet: 'The Cable', outletAccentColor: '#0a2540', url: 'https://www.thecable.ng/newspaper-headlines-terrorists-ambush-soldiers-recovering-corpses-of-farmers-in-borno/', headline: 'Newspaper Headlines: Terrorists Ambush Soldiers Recovering Corpses Of Farmers In Borno', i18n: { fr: { headline: 'Revue de presse : des terroristes tendent une embuscade à des soldats récupérant les corps d\'agriculteurs à Borno' }, ar: { headline: 'عناوين الصحف: إرهابيون ينصبون كمينًا لجنود أثناء استعادة جثث مزارعين في بورنو' } }, body: [], fetchFailed: true },
+    { id: 'punch-3', operation: 'IV', outlet: 'Punch', outletAccentColor: '#c8102e', url: 'http://punchng.com/troops-kill-over-50-terrorists-in-borno-yobe-military/', headline: 'Troops Kill Over 50 Terrorists In Borno, Yobe — Military', i18n: { fr: { headline: 'Les troupes tuent plus de 50 terroristes à Borno et Yobe — armée' }, ar: { headline: 'القوات تقتل أكثر من 50 إرهابيًا في بورنو ويوبي — الجيش' } }, body: [], fetchFailed: true },
+    { id: 'premiumtimes-1', operation: 'IV', outlet: 'Premium Times', outletAccentColor: '#0b3d91', url: 'https://www.premiumtimesng.com/news/headlines/799991-nigerian-troops-kill-iswap-commander-many-other-terrorists-in-borno-yobe-official.html', headline: 'Nigerian Troops Kill ISWAP Commander, Many Other Terrorists In Borno, Yobe — Official', i18n: { fr: { headline: 'Les troupes nigérianes tuent un commandant de l\'ISWAP et de nombreux autres terroristes à Borno et Yobe — officiel' }, ar: { headline: 'القوات النيجيرية تقتل قائدًا في داعش غرب أفريقيا والعديد من الإرهابيين الآخرين في بورنو ويوبي — مسؤول' } }, body: [], fetchFailed: true },
+    { id: 'humangle-1', operation: 'IV', outlet: 'HumAngle', outletAccentColor: '#1f7a4d', url: 'https://humanglemedia.com/nigerian-military-confirms-22-soldiers-killed-in-ongoing-operations-against-terrorists/', headline: 'Nigerian Military Confirms 22 Soldiers Killed In Ongoing Operations Against Terrorists', i18n: { fr: { headline: 'L\'armée nigériane confirme la mort de 22 soldats lors d\'opérations en cours contre les terroristes' }, ar: { headline: 'الجيش النيجيري يؤكد مقتل 22 جنديًا في عمليات جارية ضد الإرهابيين' } }, body: [], fetchFailed: true },
+    { id: 'justicewatch-1', operation: 'IV', outlet: 'Justice Watch News', outletAccentColor: '#4a4a4a', url: 'https://justicewatchnews.com/nigeria-army-provides-update-on-terrorist-attack-on-troops-in-timbuktu-triangle/', headline: 'Nigeria Army Provides Update On Terrorist Attack On Troops In Timbuktu Triangle', i18n: { fr: { headline: 'L\'armée nigériane fait le point sur l\'attaque terroriste contre les troupes dans le Triangle de Timbuktu' }, ar: { headline: 'الجيش النيجيري يقدم تحديثًا حول الهجوم الإرهابي على القوات في مثلث تمبكتو' } }, body: [], fetchFailed: true },
+    { id: 'kwara-1', operation: 'IV', outlet: 'Kwara Reporters', outletAccentColor: '#1a1a1a', url: 'https://www.kwarareporters.com.ng/2025/01/three-officers-several-nigerian.html', headline: 'Three Officers, Several Nigerian Soldiers Killed In Borno Attack', i18n: { fr: { headline: 'Trois officiers et plusieurs soldats nigérians tués dans une attaque à Borno' }, ar: { headline: 'مقتل ثلاثة ضباط وعدة جنود نيجيريين في هجوم على بورنو' } }, body: [], fetchFailed: true }
   ];
 
   /* ---------------- stage scaling ---------------- */
@@ -193,6 +194,7 @@
     if (state.screen === 'documentary') renderDocList();
     if (state.screen === 'news') renderNewsList();
     if (state.screen === 'tribute') renderTribute();
+    if (state.screen === 'article' && state.currentArticle) openArticle(state.currentArticle);
   }
 
   /* ---------------- ABOUT ---------------- */
@@ -326,6 +328,14 @@
     });
   }
 
+  // Reads a translated field off an article's i18n block, falling back to
+  // the base (English) field when no translation exists for state.lang.
+  function articleField(a, field) {
+    var loc = a.i18n && a.i18n[state.lang];
+    if (loc && loc[field] !== undefined) return loc[field];
+    return a[field];
+  }
+
   function renderNewsList() {
     el.newsOpIvHeading.textContent = t('operationIV') + ' — ' + t('operationIVDate');
     el.newsOpVHeading.textContent = t('operationV') + ' — ' + t('operationVDate');
@@ -355,7 +365,7 @@
         (a.localImage ? '<img class="news-card-photo" src="' + a.localImage + '" alt="" onerror="this.remove()" />' : '') +
         '<div class="news-card-crease"></div>' +
         '<div class="news-card-body">' +
-          '<span class="news-card-headline">' + escapeHtml(a.headline) + '</span>' +
+          '<span class="news-card-headline">' + escapeHtml(articleField(a, 'headline')) + '</span>' +
           (a.date ? '<span class="news-card-date">' + escapeHtml(a.date) + '</span>' : '') +
         '</div>';
       card.addEventListener('click', function () { openArticle(a); });
@@ -364,6 +374,7 @@
   }
 
   function openArticle(a) {
+    state.currentArticle = a;
     var color = a.outletAccentColor || '#b5651d';
     var logoPath = (state.outletLogos && state.outletLogos[a.outlet]) || null;
     el.articleMasthead.style.background = color;
@@ -374,9 +385,10 @@
     el.articleHero.innerHTML = a.localImage ? '<img src="' + a.localImage + '" alt="" onerror="this.parentElement.style.display=\'none\'" />' : '';
     el.articleHero.style.display = a.localImage ? 'block' : 'none';
 
-    el.articleHeadline.textContent = a.headline;
-    el.articleDek.textContent = a.dek || '';
-    el.articleDek.style.display = a.dek ? 'block' : 'none';
+    var dek = articleField(a, 'dek');
+    el.articleHeadline.textContent = articleField(a, 'headline');
+    el.articleDek.textContent = dek || '';
+    el.articleDek.style.display = dek ? 'block' : 'none';
 
     var metaBits = [];
     if (a.byline) metaBits.push(a.byline);
@@ -384,9 +396,10 @@
     el.articleMeta.textContent = metaBits.join(' • ');
     el.articleMeta.style.display = metaBits.length ? 'block' : 'none';
 
+    var body = articleField(a, 'body');
     el.articleBody.innerHTML = '';
-    if (a.body && a.body.length) {
-      a.body.forEach(function (para) {
+    if (body && body.length) {
+      body.forEach(function (para) {
         var p = document.createElement('p');
         p.textContent = para;
         el.articleBody.appendChild(p);
