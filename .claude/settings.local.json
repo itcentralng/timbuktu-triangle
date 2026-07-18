@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/nasir/Documents/imperial/Timbuktu/Timbuktu Triangle\" && mkdir -p data assets/audio/en assets/audio/ar assets/audio/fr assets/images .claude && ls -la)",
+      "WebFetch(domain:www.tvcnews.tv)",
+      "WebFetch(domain:zagazola.org)",
+      "WebFetch(domain:www.vanguardngr.com)",
+      "WebFetch(domain:prnigeria.com)",
+      "WebFetch(domain:www.trtworld.com)",
+      "WebFetch(domain:guardian.ng)",
+      "WebFetch(domain:www.thisdaylive.com)",
+      "WebFetch(domain:punchng.com)",
+      "WebFetch(domain:www.arise.tv)",
+      "WebFetch(domain:www.thehindu.com)",
+      "WebFetch(domain:ndarason.com)",
+      "WebFetch(domain:www.thecable.ng)",
+      "WebFetch(domain:www.channelstv.com)",
+      "WebFetch(domain:www.premiumtimesng.com)",
+      "WebFetch(domain:humanglemedia.com)",
+      "WebFetch(domain:justicewatchnews.com)",
+      "WebFetch(domain:www.kwarareporters.com.ng)",
+      "WebFetch(domain:www.google.com)",
+      "WebFetch(domain:archive.org)",
+      "WebFetch(domain:web.archive.org)",
+      "Bash(chmod +x \"/private/tmp/claude-501/-Users-nasir-Documents-imperial-Timbuktu-Timbuktu-Triangle/d3ad75a8-e749-4eb6-81ca-16c88414e4b0/scratchpad/download_images.sh\")",
+      "Bash(bash \"/private/tmp/claude-501/-Users-nasir-Documents-imperial-Timbuktu-Timbuktu-Triangle/d3ad75a8-e749-4eb6-81ca-16c88414e4b0/scratchpad/download_images.sh\")",
+      "Bash(curl -s -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' https://punchng.com/military-discovers-bharam-underground-storage-fuel-dump/)",
+      "Bash(curl -sL -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -o /tmp/punch50.html -w 'HTTP:%{http_code} size:%{size_download}\\\\n' http://punchng.com/troops-kill-over-50-terrorists-in-borno-yobe-military/)",
+      "Read(//tmp/**)",
+      "Bash(rm -f /tmp/tc_cookies.txt)",
+      "Bash(curl -s -c /tmp/tc_cookies.txt -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -o /dev/null https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/)",
+      "Bash(curl -s -b /tmp/tc_cookies.txt -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -H 'Referer: https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/' -o /tmp/tc_img.bin -w 'code:%{http_code} size:%{size_download}\\\\n' https://www.thecable.ng/wp-content/uploads/2024/04/soldiers-troops-army-e1622629206152.webp)"
+    ]
+  }
+}
