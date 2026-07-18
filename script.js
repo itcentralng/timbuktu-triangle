@@ -89,9 +89,8 @@
     });
 
     el.topbarTitle.textContent = t('appTitle');
-    el.attractTapLabel.textContent = t('tapToBegin');
 
-    document.querySelectorAll('.lang-switch button').forEach(function (btn) {
+    document.querySelectorAll('.lang-switch button, .attract-lang-pill').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-lang') === state.lang);
     });
 
@@ -99,7 +98,7 @@
   }
 
   /* ---------------- navigation ---------------- */
-  var NO_TOPBAR = { attract: true, language: true, article: true };
+  var NO_TOPBAR = { attract: true, article: true };
 
   function showScreen(id) {
     stopAboutAudio();
@@ -157,14 +156,11 @@
     ambientFadeRaf = requestAnimationFrame(step);
   }
 
-  /* ---------------- ATTRACT / LANGUAGE ---------------- */
-  function initAttractAndLanguage() {
-    el.screens.attract.addEventListener('click', function () {
-      showScreen('language');
-    });
-    document.querySelectorAll('.lang-card').forEach(function (card) {
-      card.addEventListener('click', function () {
-        var lang = card.getAttribute('data-lang');
+  /* ---------------- ATTRACT / HOME ---------------- */
+  function initAttractAndHome() {
+    document.querySelectorAll('.attract-lang-pill').forEach(function (pill) {
+      pill.addEventListener('click', function () {
+        var lang = pill.getAttribute('data-lang');
         setLang(lang);
         showScreen('home');
         playWelcomeAudio(lang);
@@ -464,13 +460,11 @@
     el.stage = document.getElementById('stage');
     el.topbar = document.getElementById('topbar');
     el.topbarTitle = document.getElementById('topbar-title');
-    el.attractTapLabel = document.getElementById('attract-tap-label');
     el.btnHome = document.getElementById('btn-home');
     el.btnClose = document.getElementById('btn-close');
 
     el.screens = {
       attract: document.getElementById('screen-attract'),
-      language: document.getElementById('screen-language'),
       home: document.getElementById('screen-home'),
       about: document.getElementById('screen-about'),
       documentary: document.getElementById('screen-documentary'),
@@ -580,7 +574,7 @@
   function init() {
     cacheEls();
     bindEvents();
-    initAttractAndLanguage();
+    initAttractAndHome();
     scaleStage();
     applyStaticI18n();
     showScreen('attract');

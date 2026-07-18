@@ -21,8 +21,6 @@ const TT_CONTENT = {
     en: {
       appTitle: 'The Timbuktu Triangle',
       appSubtitle: 'Nigerian Army — Operations Desert Sanity IV & V',
-      tapToBegin: 'Touch to Begin',
-      selectLanguage: 'Select your language',
       menuAbout: 'The Triangle',
       menuAboutSub: 'Understand the ground and the operations',
       menuDocumentary: 'Watch the Documentary',
@@ -63,8 +61,6 @@ const TT_CONTENT = {
     fr: {
       appTitle: 'Le Triangle de Timbuktu',
       appSubtitle: 'Armée nigériane — Opérations Desert Sanity IV et V',
-      tapToBegin: 'Touchez pour commencer',
-      selectLanguage: 'Choisissez votre langue',
       menuAbout: 'Le Triangle',
       menuAboutSub: 'Comprendre le terrain et les opérations',
       menuDocumentary: 'Regarder le documentaire',
@@ -105,8 +101,6 @@ const TT_CONTENT = {
     ar: {
       appTitle: 'مثلث تمبكتو',
       appSubtitle: 'الجيش النيجيري — عمليتا ديزرت سانيتي الرابعة والخامسة',
-      tapToBegin: 'المس للبدء',
-      selectLanguage: 'اختر لغتك',
       menuAbout: 'المثلث',
       menuAboutSub: 'تعرّف على طبيعة الأرض والعمليات',
       menuDocumentary: 'شاهد الفيلم الوثائقي',
