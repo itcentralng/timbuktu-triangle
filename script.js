@@ -21,6 +21,18 @@
   var aboutAudio = null;
   var welcomeAudio = null;
 
+  // Looping ambient bed under the whole app, ducked whenever narration or
+  // video audio plays. Drop the loop file at AMBIENT_SRC to activate it —
+  // until then startAmbientAudio() just fails silently.
+  var AMBIENT_SRC = 'assets/audio/ambient.mp3';
+  var AMBIENT_VOLUME = 0.35;
+  var AMBIENT_DUCK_VOLUME = 0.08;
+  var AMBIENT_FADE_MS = 600;
+  var ambientAudio = null;
+  var ambientDuckCount = 0;
+  var ambientFadeRaf = null;
+  var videoDucked = false;
+
   // Minimal fallback so the News section is never empty while the
   // background fetch job (data/news-articles.json) hasn't landed yet.
   var NEWS_FALLBACK = [
@@ -107,6 +119,44 @@
 
   function goHome() { showScreen('home'); }
 
+  /* ---------------- AMBIENT AUDIO ---------------- */
+  function startAmbientAudio() {
+    if (ambientAudio) return;
+    var audio = new Audio(AMBIENT_SRC);
+    audio.loop = true;
+    audio.volume = 0;
+    audio.play().then(function () {
+      ambientAudio = audio;
+      fadeAudioTo(ambientAudio, ambientDuckCount > 0 ? AMBIENT_DUCK_VOLUME : AMBIENT_VOLUME, AMBIENT_FADE_MS);
+    }).catch(function () {});
+  }
+
+  function duckAmbientAudio() {
+    ambientDuckCount++;
+    if (ambientAudio) fadeAudioTo(ambientAudio, AMBIENT_DUCK_VOLUME, AMBIENT_FADE_MS);
+  }
+
+  function unduckAmbientAudio() {
+    ambientDuckCount = Math.max(0, ambientDuckCount - 1);
+    if (ambientDuckCount === 0 && ambientAudio) fadeAudioTo(ambientAudio, AMBIENT_VOLUME, AMBIENT_FADE_MS);
+  }
+
+  function fadeAudioTo(audio, target, duration, onDone) {
+    if (ambientFadeRaf) cancelAnimationFrame(ambientFadeRaf);
+    var start = audio.volume, startTime = performance.now();
+    function step(now) {
+      var p = Math.min(1, (now - startTime) / duration);
+      audio.volume = start + (target - start) * p;
+      if (p < 1) {
+        ambientFadeRaf = requestAnimationFrame(step);
+      } else {
+        ambientFadeRaf = null;
+        if (onDone) onDone();
+      }
+    }
+    ambientFadeRaf = requestAnimationFrame(step);
+  }
+
   /* ---------------- ATTRACT / LANGUAGE ---------------- */
   function initAttractAndLanguage() {
     el.screens.attract.addEventListener('click', function () {
@@ -127,14 +177,16 @@
     var src = TT_CONTENT.welcomeAudio && TT_CONTENT.welcomeAudio[lang];
     if (!src) return;
     welcomeAudio = new Audio(src);
-    welcomeAudio.addEventListener('ended', function () { welcomeAudio = null; });
-    welcomeAudio.play().catch(function () { welcomeAudio = null; });
+    duckAmbientAudio();
+    welcomeAudio.addEventListener('ended', function () { welcomeAudio = null; unduckAmbientAudio(); });
+    welcomeAudio.play().catch(function () { welcomeAudio = null; unduckAmbientAudio(); });
   }
 
   function stopWelcomeAudio() {
     if (welcomeAudio) {
       welcomeAudio.pause();
       welcomeAudio = null;
+      unduckAmbientAudio();
     }
   }
 
@@ -175,6 +227,7 @@
     if (aboutAudio) {
       aboutAudio.pause();
       aboutAudio = null;
+      unduckAmbientAudio();
     }
     el.aboutListen.classList.remove('playing');
     el.aboutListen.querySelector('.icon-play').classList.remove('hidden');
@@ -191,6 +244,7 @@
     if (!src) { flashUnavailable(); return; }
 
     aboutAudio = new Audio(src);
+    duckAmbientAudio();
     aboutAudio.addEventListener('ended', stopAboutAudio);
     aboutAudio.addEventListener('error', function () {
       stopAboutAudio();
@@ -234,6 +288,7 @@
   function openVideo(src) {
     el.videoPlayer.src = encodeURI(src);
     el.videoOverlay.classList.remove('hidden');
+    if (!videoDucked) { duckAmbientAudio(); videoDucked = true; }
     el.videoPlayer.play().catch(function () {});
     setVideoPlayIcon(true);
   }
@@ -242,6 +297,7 @@
     el.videoPlayer.removeAttribute('src');
     el.videoPlayer.load();
     el.videoOverlay.classList.add('hidden');
+    if (videoDucked) { unduckAmbientAudio(); videoDucked = false; }
   }
   function setVideoPlayIcon(playing) {
     el.videoPlayPause.querySelector('.icon-play').classList.toggle('hidden', playing);
@@ -462,6 +518,7 @@
     el.tributeTableV = document.getElementById('tribute-table-v');
 
     el.idleOverlay = document.getElementById('idle-overlay');
+    el.bgVideo = document.querySelector('.app-bg-video');
   }
 
   function bindEvents() {
@@ -508,6 +565,15 @@
 
     ['click', 'touchstart'].forEach(function (evt) {
       document.addEventListener(evt, resetIdleTimer, { passive: true });
+      // Fallback in case the browser blocked the autoplay attempt in init() —
+      // startAmbientAudio() is a no-op once it's already playing.
+      document.addEventListener(evt, startAmbientAudio, { passive: true });
+    });
+
+    // Chromium can pause a muted <video> when the kiosk window briefly loses
+    // focus/visibility (e.g. an OS overlay) — resume it once it's back.
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && el.bgVideo && el.bgVideo.paused) el.bgVideo.play().catch(function () {});
     });
   }
 
@@ -518,6 +584,7 @@
     scaleStage();
     applyStaticI18n();
     showScreen('attract');
+    startAmbientAudio();
   }
 
   document.addEventListener('DOMContentLoaded', init);
