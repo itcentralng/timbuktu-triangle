@@ -21,6 +21,8 @@
   var el = {}; // populated in init()
   var idleTimer = null;
   var aboutAudio = null;
+  var aboutAutoPlay = false;
+  var aboutDucked = false;
   var welcomeAudio = null;
 
   // Looping ambient bed under the whole app, ducked whenever narration or
@@ -199,7 +201,7 @@
   }
 
   /* ---------------- ABOUT ---------------- */
-  function renderAboutParagraph() {
+  function renderAboutParagraph(keepAudio) {
     var data = TT_CONTENT.about[state.lang];
     var paragraphs = data.paragraphs;
     if (state.aboutIndex >= paragraphs.length) state.aboutIndex = paragraphs.length - 1;
@@ -218,14 +220,18 @@
     el.aboutPrev.style.visibility = state.aboutIndex === 0 ? 'hidden' : 'visible';
     el.aboutNext.style.visibility = state.aboutIndex === paragraphs.length - 1 ? 'hidden' : 'visible';
 
-    stopAboutAudio();
+    if (!keepAudio) stopAboutAudio();
     el.aboutParagraphWrap.scrollTop = 0;
   }
 
   function stopAboutAudio() {
+    aboutAutoPlay = false;
     if (aboutAudio) {
       aboutAudio.pause();
       aboutAudio = null;
+    }
+    if (aboutDucked) {
+      aboutDucked = false;
       unduckAmbientAudio();
     }
     el.aboutListen.classList.remove('playing');
@@ -234,17 +240,25 @@
     el.aboutListen.querySelector('.listen-label').textContent = t('listen');
   }
 
+  // Pressing "Listen" starts a chain that keeps auto-advancing to the next
+  // paragraph's audio until the last page. Any manual prev/next, pause, or
+  // screen/language change interrupts it via stopAboutAudio().
   function toggleAboutAudio() {
     if (aboutAudio && !aboutAudio.paused) {
       stopAboutAudio();
       return;
     }
+    aboutAutoPlay = true;
+    if (!aboutDucked) { aboutDucked = true; duckAmbientAudio(); }
+    playAboutAudio();
+  }
+
+  function playAboutAudio() {
     var src = (TT_CONTENT.audio[state.lang] || [])[state.aboutIndex];
-    if (!src) { flashUnavailable(); return; }
+    if (!src) { stopAboutAudio(); flashUnavailable(); return; }
 
     aboutAudio = new Audio(src);
-    duckAmbientAudio();
-    aboutAudio.addEventListener('ended', stopAboutAudio);
+    aboutAudio.addEventListener('ended', handleAboutAudioEnded);
     aboutAudio.addEventListener('error', function () {
       stopAboutAudio();
       flashUnavailable();
@@ -258,6 +272,17 @@
       stopAboutAudio();
       flashUnavailable();
     });
+  }
+
+  function handleAboutAudioEnded() {
+    var paragraphs = TT_CONTENT.about[state.lang].paragraphs;
+    if (aboutAutoPlay && state.aboutIndex < paragraphs.length - 1) {
+      state.aboutIndex++;
+      renderAboutParagraph(true);
+      playAboutAudio();
+    } else {
+      stopAboutAudio();
+    }
   }
 
   function flashUnavailable() {
