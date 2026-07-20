@@ -167,16 +167,12 @@
         <section class="screen" id="screen-news">
           <div class="news-wrap">
             <p class="news-intro" data-i18n="newsIntro"></p>
-            <div class="news-columns">
-              <div class="news-op-block">
-                <h3 class="news-op-heading" id="news-op-iv-heading"></h3>
-                <div class="news-cards" id="news-cards-iv"></div>
-              </div>
-              <div class="news-op-block">
-                <h3 class="news-op-heading" id="news-op-v-heading"></h3>
-                <div class="news-cards" id="news-cards-v"></div>
-              </div>
+            <div class="news-filter" id="news-filter">
+              <button class="news-filter-btn active" data-filter="all" data-i18n="newsFilterAll"></button>
+              <button class="news-filter-btn" data-filter="IV" data-i18n="operationIV"></button>
+              <button class="news-filter-btn" data-filter="V" data-i18n="operationV"></button>
             </div>
+            <div class="news-grid" id="news-grid"></div>
           </div>
         </section>
 

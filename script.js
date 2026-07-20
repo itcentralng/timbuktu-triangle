@@ -14,6 +14,7 @@
     aboutIndex: 0,
     newsArticles: null,
     newsLoaded: false,
+    newsFilter: 'all',
     currentArticle: null
   };
 
@@ -337,12 +338,15 @@
   }
 
   function renderNewsList() {
-    el.newsOpIvHeading.textContent = t('operationIV') + ' — ' + t('operationIVDate');
-    el.newsOpVHeading.textContent = t('operationV') + ' — ' + t('operationVDate');
+    el.newsFilterBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-filter') === state.newsFilter);
+    });
 
     var articles = state.newsArticles || NEWS_FALLBACK;
-    renderNewsCards(el.newsCardsIv, articles.filter(function (a) { return a.operation === 'IV'; }));
-    renderNewsCards(el.newsCardsV, articles.filter(function (a) { return a.operation === 'V'; }));
+    if (state.newsFilter !== 'all') {
+      articles = articles.filter(function (a) { return a.operation === state.newsFilter; });
+    }
+    renderNewsCards(el.newsGrid, articles);
   }
 
   function renderNewsCards(container, articles) {
@@ -355,16 +359,17 @@
       var card = document.createElement('button');
       card.className = 'news-card' + (a.fetchFailed && (!a.body || !a.body.length) ? ' unavailable' : '');
       card.innerHTML =
-        '<div class="news-card-masthead" style="--outlet-color:' + color + '">' +
-          '<span class="news-card-logo-wrap" style="--outlet-color:' + color + '">' +
-            (logoPath ? '<img class="news-card-logo" src="' + logoPath + '" alt="" onerror="this.remove()" />' : '') +
-            '<span class="news-card-logo-fallback">' + escapeHtml(initial) + '</span>' +
-          '</span>' +
-          '<span class="news-card-outlet" style="--outlet-color:' + color + '">' + escapeHtml(a.outlet) + '</span>' +
-        '</div>' +
-        (a.localImage ? '<img class="news-card-photo" src="' + a.localImage + '" alt="" onerror="this.remove()" />' : '') +
-        '<div class="news-card-crease"></div>' +
+        (a.localImage
+          ? '<img class="news-card-photo" src="' + a.localImage + '" alt="" onerror="this.remove()" />'
+          : '<div class="news-card-photo-fallback" style="--outlet-color:' + color + '">' + escapeHtml(initial) + '</div>') +
         '<div class="news-card-body">' +
+          '<div class="news-card-masthead">' +
+            '<span class="news-card-logo-wrap" style="--outlet-color:' + color + '">' +
+              (logoPath ? '<img class="news-card-logo" src="' + logoPath + '" alt="" onerror="this.remove()" />' : '') +
+              '<span class="news-card-logo-fallback">' + escapeHtml(initial) + '</span>' +
+            '</span>' +
+            '<span class="news-card-outlet">' + escapeHtml(a.outlet) + '</span>' +
+          '</div>' +
           '<span class="news-card-headline">' + escapeHtml(articleField(a, 'headline')) + '</span>' +
           (a.date ? '<span class="news-card-date">' + escapeHtml(a.date) + '</span>' : '') +
         '</div>';
@@ -504,10 +509,8 @@
     el.videoTimeCurrent = document.getElementById('video-time-current');
     el.videoTimeDuration = document.getElementById('video-time-duration');
 
-    el.newsOpIvHeading = document.getElementById('news-op-iv-heading');
-    el.newsOpVHeading = document.getElementById('news-op-v-heading');
-    el.newsCardsIv = document.getElementById('news-cards-iv');
-    el.newsCardsV = document.getElementById('news-cards-v');
+    el.newsFilterBtns = document.querySelectorAll('.news-filter-btn');
+    el.newsGrid = document.getElementById('news-grid');
 
     el.articleBack = document.getElementById('article-back');
     el.articleScroll = document.getElementById('article-scroll');
@@ -569,6 +572,13 @@
     });
 
     el.articleBack.addEventListener('click', function () { showScreen('news'); });
+
+    el.newsFilterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.newsFilter = btn.getAttribute('data-filter');
+        renderNewsList();
+      });
+    });
 
     ['click', 'touchstart'].forEach(function (evt) {
       document.addEventListener(evt, resetIdleTimer, { passive: true });
