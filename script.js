@@ -38,6 +38,16 @@
   var ambientFadeRaf = null;
   var videoDucked = false;
 
+  // Fallen Heroes page: a looping taps.mp3 bed plus a slow auto-scroll
+  // through the roster, both live only while that screen is open.
+  var TAPS_SRC = 'assets/audio/taps.mp3';
+  var TRIBUTE_SCROLL_SPEED = 0.35; // px per animation frame (~21px/s)
+  var TRIBUTE_SCROLL_START_DELAY = 1500; // ms pause before the scroll begins
+  var tapsAudio = null;
+  var tributeDucked = false;
+  var tributeScrollTimer = null;
+  var tributeScrollRaf = null;
+
   // Minimal fallback so the News section is never empty if data/news-articles.js
   // fails to load for some reason.
   var NEWS_FALLBACK = [
@@ -108,6 +118,8 @@
   function showScreen(id) {
     stopAboutAudio();
     stopWelcomeAudio();
+    stopTapsAudio();
+    stopTributeAutoScroll();
     Object.keys(el.screens).forEach(function (key) {
       el.screens[key].classList.toggle('active', key === id);
     });
@@ -118,7 +130,7 @@
     if (id === 'about') renderAboutParagraph();
     if (id === 'documentary') renderDocList();
     if (id === 'news') ensureNewsLoaded(renderNewsList);
-    if (id === 'tribute') renderTribute();
+    if (id === 'tribute') { startTapsAudio(); renderTribute(); }
   }
 
   function goHome() { showScreen('home'); }
@@ -515,15 +527,63 @@
       });
       el.tributeOrganogram.appendChild(row);
     });
+
+    startTributeAutoScroll();
+  }
+
+  function startTapsAudio() {
+    if (tapsAudio) return;
+    tapsAudio = new Audio(TAPS_SRC);
+    tapsAudio.loop = true;
+    tributeDucked = true;
+    duckAmbientAudio();
+    tapsAudio.play().catch(function () {});
+  }
+
+  function stopTapsAudio() {
+    if (tapsAudio) {
+      tapsAudio.pause();
+      tapsAudio = null;
+    }
+    if (tributeDucked) {
+      tributeDucked = false;
+      unduckAmbientAudio();
+    }
+  }
+
+  function stopTributeAutoScroll() {
+    if (tributeScrollTimer) { clearTimeout(tributeScrollTimer); tributeScrollTimer = null; }
+    if (tributeScrollRaf) { cancelAnimationFrame(tributeScrollRaf); tributeScrollRaf = null; }
+  }
+
+  // Re-armed on every render (screen entry, filter switch, language change) —
+  // a brief pause lets the visitor take in the top of the list first. Any
+  // manual wheel/touch on the roster cancels it via stopTributeAutoScroll().
+  function startTributeAutoScroll() {
+    stopTributeAutoScroll();
+    tributeScrollTimer = setTimeout(function () {
+      tributeScrollTimer = null;
+      tributeScrollRaf = requestAnimationFrame(stepTributeAutoScroll);
+    }, TRIBUTE_SCROLL_START_DELAY);
+  }
+
+  function stepTributeAutoScroll() {
+    var org = el.tributeOrganogram;
+    var max = org.scrollHeight - org.clientHeight;
+    if (org.scrollTop >= max) { tributeScrollRaf = null; return; }
+    org.scrollTop += TRIBUTE_SCROLL_SPEED;
+    tributeScrollRaf = requestAnimationFrame(stepTributeAutoScroll);
   }
 
   /* ---------------- IDLE / ATTRACT RESET ---------------- */
-  // Actively listening to About narration or watching the documentary counts
-  // as activity even without touching the screen, so the idle timer should
-  // not run while either is actually playing.
+  // Actively listening to About narration, watching the documentary, or
+  // taking in the Fallen Heroes roster (taps + auto-scroll) counts as
+  // activity even without touching the screen, so the idle timer should
+  // not run while any of them is actually playing.
   function isNarrationOrVideoPlaying() {
     if (aboutAudio && !aboutAudio.paused) return true;
     if (!el.videoOverlay.classList.contains('hidden') && !el.videoPlayer.paused) return true;
+    if (tapsAudio && !tapsAudio.paused) return true;
     return false;
   }
 
@@ -661,6 +721,12 @@
         state.tributeFilter = btn.getAttribute('data-filter');
         renderTribute();
       });
+    });
+
+    // Any manual wheel/touch on the roster hands scroll control to the
+    // visitor for the rest of this view (see startTributeAutoScroll()).
+    ['wheel', 'touchstart'].forEach(function (evt) {
+      el.tributeOrganogram.addEventListener(evt, stopTributeAutoScroll, { passive: true });
     });
 
     ['click', 'touchstart'].forEach(function (evt) {
