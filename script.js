@@ -238,6 +238,7 @@
     el.aboutListen.querySelector('.icon-play').classList.remove('hidden');
     el.aboutListen.querySelector('.icon-pause').classList.add('hidden');
     el.aboutListen.querySelector('.listen-label').textContent = t('listen');
+    resetIdleTimer();
   }
 
   // Pressing "Listen" starts a chain that keeps auto-advancing to the next
@@ -268,6 +269,7 @@
       el.aboutListen.querySelector('.icon-play').classList.add('hidden');
       el.aboutListen.querySelector('.icon-pause').classList.remove('hidden');
       el.aboutListen.querySelector('.listen-label').textContent = t('pause');
+      pauseIdleTimer();
     }).catch(function () {
       stopAboutAudio();
       flashUnavailable();
@@ -481,9 +483,23 @@
   }
 
   /* ---------------- IDLE / ATTRACT RESET ---------------- */
+  // Actively listening to About narration or watching the documentary counts
+  // as activity even without touching the screen, so the idle timer should
+  // not run while either is actually playing.
+  function isNarrationOrVideoPlaying() {
+    if (aboutAudio && !aboutAudio.paused) return true;
+    if (!el.videoOverlay.classList.contains('hidden') && !el.videoPlayer.paused) return true;
+    return false;
+  }
+
+  function pauseIdleTimer() {
+    if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+  }
+
   function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
+    pauseIdleTimer();
     if (state.screen === 'attract') return;
+    if (isNarrationOrVideoPlaying()) return;
     idleTimer = setTimeout(triggerIdleReset, IDLE_TIMEOUT_MS);
   }
 
@@ -581,8 +597,8 @@
     el.videoPlayPause.addEventListener('click', function () {
       if (el.videoPlayer.paused) { el.videoPlayer.play(); } else { el.videoPlayer.pause(); }
     });
-    el.videoPlayer.addEventListener('play', function () { setVideoPlayIcon(true); });
-    el.videoPlayer.addEventListener('pause', function () { setVideoPlayIcon(false); });
+    el.videoPlayer.addEventListener('play', function () { setVideoPlayIcon(true); pauseIdleTimer(); });
+    el.videoPlayer.addEventListener('pause', function () { setVideoPlayIcon(false); resetIdleTimer(); });
     el.videoPlayer.addEventListener('timeupdate', function () {
       if (el.videoPlayer.duration) {
         el.videoScrub.value = (el.videoPlayer.currentTime / el.videoPlayer.duration) * 100;
