@@ -38,8 +38,8 @@
   var ambientFadeRaf = null;
   var videoDucked = false;
 
-  // Minimal fallback so the News section is never empty while the
-  // background fetch job (data/news-articles.json) hasn't landed yet.
+  // Minimal fallback so the News section is never empty if data/news-articles.js
+  // fails to load for some reason.
   var NEWS_FALLBACK = [
     { id: 'tvc-1', operation: 'V', outlet: 'TVC News', outletAccentColor: '#0f4c8c', url: 'https://www.tvcnews.tv/troops-bust-terrorist-camps-thwart-attacks-in-northeast-operation/', headline: 'Troops Bust Terrorist Camps, Thwart Attacks In Northeast Operation', i18n: { fr: { headline: 'Les troupes démantèlent des camps terroristes et déjouent des attaques dans le cadre de l\'opération du Nord-Est' }, ar: { headline: 'القوات تدمر معسكرات إرهابية وتحبط هجمات في عملية شمال شرق نيجيريا' } }, body: [], fetchFailed: true },
     { id: 'zagazola-1', operation: 'V', outlet: 'Zagazola Makama', outletAccentColor: '#1a1a1a', url: 'https://zagazola.org/index.php/breaking-news/troops-dismantle-three-boko-haram-detention-facilities-in-timbuktu-triangle', headline: 'Troops Dismantle Three Boko Haram Detention Facilities In Timbuktu Triangle', i18n: { fr: { headline: 'Les troupes démantèlent trois centres de détention de Boko Haram dans le Triangle de Timbuktu' }, ar: { headline: 'القوات تفكك ثلاثة مرافق احتجاز تابعة لبوكو حرام في مثلث تمبكتو' } }, body: [], fetchFailed: true },
@@ -337,24 +337,17 @@
   }
 
   /* ---------------- NEWS ---------------- */
+  // TT_NEWS / TT_OUTLET_LOGOS are loaded as plain <script> globals (see
+  // index.html), not fetch()'d — fetch() of local files is blocked under
+  // file:// in Chromium, which is how the kiosk build actually runs (run.bat).
   function ensureNewsLoaded(cb) {
     if (state.newsLoaded) { cb(); return; }
-    var articlesPromise = fetch('data/news-articles.json')
-      .then(function (r) { if (!r.ok) throw new Error('no data file'); return r.json(); })
-      .then(function (json) {
-        state.newsArticles = (json && json.articles && json.articles.length) ? json.articles : NEWS_FALLBACK;
-      })
-      .catch(function () {
-        state.newsArticles = NEWS_FALLBACK;
-      });
-    var logosPromise = fetch('data/outlet-logos.json')
-      .then(function (r) { if (!r.ok) throw new Error('no logo manifest'); return r.json(); })
-      .then(function (json) { state.outletLogos = json || {}; })
-      .catch(function () { state.outletLogos = {}; });
-    Promise.all([articlesPromise, logosPromise]).then(function () {
-      state.newsLoaded = true;
-      cb();
-    });
+    state.newsArticles = (typeof TT_NEWS !== 'undefined' && TT_NEWS.articles && TT_NEWS.articles.length)
+      ? TT_NEWS.articles
+      : NEWS_FALLBACK;
+    state.outletLogos = (typeof TT_OUTLET_LOGOS !== 'undefined') ? TT_OUTLET_LOGOS : {};
+    state.newsLoaded = true;
+    cb();
   }
 
   // Reads a translated field off an article's i18n block, falling back to

@@ -1,4 +1,7 @@
-{
+/* Trilingual news article data. Loaded as a plain script (not fetch())
+   so it works under file:// in the kiosk build — see run.bat. */
+
+const TT_NEWS = {
   "articles": [
     {
       "id": "tvc-troops-bust-terrorist-camps",
@@ -1316,4 +1319,4 @@
       }
     }
   ]
-}
+};

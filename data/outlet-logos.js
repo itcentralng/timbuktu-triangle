@@ -1,4 +1,7 @@
-{
+/* Publisher logo paths, keyed by outlet name. Loaded as a plain script
+   (not fetch()) so it works under file:// in the kiosk build. */
+
+const TT_OUTLET_LOGOS = {
   "TVC News": "assets/logos/tvc-news.png",
   "Zagazola Makama": "assets/logos/zagazola-makama.png",
   "Vanguard": "assets/logos/vanguard.svg",
@@ -16,4 +19,4 @@
   "Justice Watch News": "assets/logos/justice-watch-news.jpg",
   "Kwara Reporters": null,
   "Premium Times": "assets/logos/premium-times.png"
-}
+};
