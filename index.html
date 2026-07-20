@@ -101,7 +101,20 @@
               </span>
             </button>
             <button class="menu-tile menu-tile--tribute" data-nav="tribute">
-              <span class="menu-tile-icon">&#x1F56F;</span>
+              <span class="menu-tile-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 20C8 19 4 15 4 9" />
+                  <path d="M12 20C16 19 20 15 20 9" />
+                  <path d="M10.5 18.5 7.5 17.3" />
+                  <path d="M7.5 15.5 4.3 14.6" />
+                  <path d="M5.5 12 2.2 11.5" />
+                  <path d="M4.3 8.5 1.3 7.6" />
+                  <path d="M13.5 18.5 16.5 17.3" />
+                  <path d="M16.5 15.5 19.7 14.6" />
+                  <path d="M18.5 12 21.8 11.5" />
+                  <path d="M19.7 8.5 22.7 7.6" />
+                </svg>
+              </span>
               <span class="menu-tile-text">
                 <span class="menu-tile-title" data-i18n="menuTribute"></span>
                 <span class="menu-tile-sub" data-i18n="menuTributeSub"></span>
@@ -198,24 +211,32 @@
           </div>
         </section>
 
-        <!-- TRIBUTE / HONOUR ROLL -->
+        <!-- TRIBUTE / FALLEN HEROES -->
         <section class="screen" id="screen-tribute">
           <div class="tribute-wrap">
             <div class="tribute-header">
-              <div class="tribute-flame">&#x1F56F;</div>
+              <div class="tribute-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 20C8 19 4 15 4 9" />
+                  <path d="M12 20C16 19 20 15 20 9" />
+                  <path d="M10.5 18.5 7.5 17.3" />
+                  <path d="M7.5 15.5 4.3 14.6" />
+                  <path d="M5.5 12 2.2 11.5" />
+                  <path d="M4.3 8.5 1.3 7.6" />
+                  <path d="M13.5 18.5 16.5 17.3" />
+                  <path d="M16.5 15.5 19.7 14.6" />
+                  <path d="M18.5 12 21.8 11.5" />
+                  <path d="M19.7 8.5 22.7 7.6" />
+                </svg>
+              </div>
               <h2 class="tribute-title" data-i18n="menuTribute"></h2>
               <p class="tribute-intro" data-i18n="tributeIntro"></p>
             </div>
-            <div class="tribute-columns">
-              <div class="tribute-block">
-                <h3 class="tribute-op-heading" data-i18n="tributeIV"></h3>
-                <div class="tribute-table" id="tribute-table-iv"></div>
-              </div>
-              <div class="tribute-block">
-                <h3 class="tribute-op-heading" data-i18n="tributeV"></h3>
-                <div class="tribute-table" id="tribute-table-v"></div>
-              </div>
+            <div class="tribute-filter" id="tribute-filter">
+              <button class="tribute-filter-btn active" data-filter="IV" data-i18n="tributeIV"></button>
+              <button class="tribute-filter-btn" data-filter="V" data-i18n="tributeV"></button>
             </div>
+            <div class="tribute-organogram" id="tribute-organogram"></div>
           </div>
         </section>
 

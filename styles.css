@@ -356,28 +356,49 @@ html[dir="rtl"] .stage, .stage[dir="rtl"] { direction: rtl; }
 .article-body p { font-size: 19px; line-height: 1.72; margin-bottom: 18px; }
 .article-footer { margin-top: 28px; padding-top: 18px; border-top: 1px solid #d8c8a8; font-size: 14px; color: #7a6a52; }
 
-/* ============ TRIBUTE ============ */
-.tribute-wrap { flex: 1; padding: 20px 56px 40px; display: flex; flex-direction: column; gap: 18px; overflow: hidden; min-height: 0; }
+/* ============ TRIBUTE / FALLEN HEROES ============ */
+.tribute-wrap { flex: 1; padding: 20px 56px 40px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; min-height: 0; }
 .tribute-header { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; flex-shrink: 0; }
-.tribute-flame { font-size: 40px; text-shadow: 0 0 24px rgba(209,169,54,0.6); }
+.tribute-icon { width: 40px; height: 40px; color: var(--gold); filter: drop-shadow(0 0 10px rgba(209,169,54,0.55)); }
 .tribute-title { font-family: var(--font-display); font-size: 32px; color: var(--sand-100); }
 .tribute-intro { font-size: 17px; color: var(--tan-400); text-align: center; line-height: 1.55; max-width: 1100px; }
-.tribute-columns { flex: 1; display: flex; flex-direction: row; gap: 40px; min-height: 0; }
-.tribute-block { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
-.tribute-op-heading { font-family: var(--font-display); font-size: 20px; color: var(--gold); text-align: center; margin-bottom: 14px; letter-spacing: 0.03em; flex-shrink: 0; }
-.tribute-table { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-inline-end: 6px; }
-.tribute-unit-label { font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tan-400); margin: 12px 0 2px; text-align: center; }
-.tribute-row {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 20px; border-radius: 14px;
+.tribute-filter { display: flex; flex-direction: row; justify-content: center; gap: 12px; flex-shrink: 0; }
+.tribute-filter-btn {
+  padding: 12px 26px;
+  border-radius: 24px; font-family: var(--font-display); font-size: 15px; letter-spacing: 0.02em;
+  color: var(--sand-200); background: rgba(247,239,224,0.06);
+  border: 1px solid rgba(209,169,54,0.3);
+}
+.tribute-filter-btn.active { background: var(--gold); color: var(--umber-900); border-color: var(--gold); }
+
+.tribute-organogram { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 6px 10px 20px; min-height: 0; }
+.tribute-tier-label {
+  font-family: var(--font-display); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); margin: 18px 0 12px; flex-shrink: 0;
+}
+.tribute-tier-label:first-child { margin-top: 4px; }
+.tribute-tier-row {
+  display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center;
+  gap: 24px; width: 100%; max-width: 1320px;
+}
+.tribute-person {
+  flex: 0 0 300px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+  padding: 16px 14px 18px; border-radius: 16px;
   background: rgba(247,239,224,0.045);
   border: 1px solid rgba(209,169,54,0.18);
-  flex-shrink: 0;
 }
-.tribute-serial { width: 30px; flex-shrink: 0; text-align: center; font-size: 13px; color: var(--gold-dim); }
-.tribute-rank { width: 74px; flex-shrink: 0; font-size: 14px; color: var(--tan-400); text-transform: uppercase; }
-.tribute-name { flex: 1; font-size: 18px; color: var(--sand-100); }
-.tribute-remarks { font-size: 12px; color: var(--tan-400); text-align: end; max-width: 140px; }
+.tribute-person-photo {
+  width: 100%; aspect-ratio: 1; border-radius: 6px; flex-shrink: 0;
+  position: relative; overflow: hidden;
+  background: rgba(209,169,54,0.12);
+  border: 1px solid rgba(209,169,54,0.35);
+  display: grid; place-items: center;
+}
+.tribute-person-fallback { width: 40%; height: 40%; color: var(--tan-400); }
+.tribute-person-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tribute-person-name { font-size: 19px; line-height: 1.3; color: var(--sand-100); }
+.tribute-person-unit { font-size: 14px; color: var(--tan-400); opacity: 0.85; }
 
 /* ============ VIDEO OVERLAY ============ */
 .video-overlay { position: absolute; inset: 0; background: #000; z-index: 200; display: flex; align-items: center; justify-content: center; }

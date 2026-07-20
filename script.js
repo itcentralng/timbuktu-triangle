@@ -15,7 +15,8 @@
     newsArticles: null,
     newsLoaded: false,
     newsFilter: 'all',
-    currentArticle: null
+    currentArticle: null,
+    tributeFilter: 'IV'
   };
 
   var el = {}; // populated in init()
@@ -454,31 +455,72 @@
     });
   }
 
-  /* ---------------- TRIBUTE ---------------- */
-  function renderTribute() {
-    renderTributeTable(el.tributeTableIv, TT_KIA.IV);
-    renderTributeTable(el.tributeTableV, TT_KIA.V);
+  /* ---------------- TRIBUTE / FALLEN HEROES ---------------- */
+  // Highest rank first, so the roster reads top-down like an organogram.
+  var RANK_ORDER = ['Lt Col', 'Lt', 'Sgt', 'Cpl', 'LCpl', 'Pte', 'CJTF'];
+
+  function rankIndex(rank) {
+    var i = RANK_ORDER.indexOf(rank);
+    return i === -1 ? RANK_ORDER.length : i;
   }
 
-  function renderTributeTable(container, opData) {
-    container.innerHTML = '';
+  // Used to look up a per-rank silhouette at assets/images/ranks/<slug>.png —
+  // drop images in with these names to replace the built-in placeholder.
+  function rankSlug(rank) {
+    return String(rank).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  function renderTribute() {
+    el.tributeFilterBtns.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-filter') === state.tributeFilter);
+    });
+    renderTributeOrganogram(TT_KIA[state.tributeFilter]);
+  }
+
+  function renderTributeOrganogram(opData) {
+    el.tributeOrganogram.innerHTML = '';
+
+    // Flatten every person across the source unit groups, then bucket by
+    // rank so seniority — not formation — drives the layout.
+    var people = [];
     opData.groups.forEach(function (group) {
-      if (group.unit) {
-        var label = document.createElement('div');
-        label.className = 'tribute-unit-label';
-        label.textContent = group.unit;
-        container.appendChild(label);
-      }
       group.rows.forEach(function (row) {
-        var r = document.createElement('div');
-        r.className = 'tribute-row';
-        r.innerHTML =
-          '<span class="tribute-serial">' + row.serial + '</span>' +
-          '<span class="tribute-rank">' + escapeHtml(row.rank) + '</span>' +
-          '<span class="tribute-name">' + escapeHtml(row.name) + '</span>' +
-          (row.remarks ? '<span class="tribute-remarks">' + escapeHtml(row.remarks) + '</span>' : '');
-        container.appendChild(r);
+        people.push({ rank: row.rank, name: row.name, unit: group.unit || row.remarks || '' });
       });
+    });
+    people.sort(function (a, b) { return rankIndex(a.rank) - rankIndex(b.rank); });
+
+    var tiers = [];
+    people.forEach(function (p) {
+      var tier = tiers[tiers.length - 1];
+      if (!tier || tier.rank !== p.rank) {
+        tier = { rank: p.rank, people: [] };
+        tiers.push(tier);
+      }
+      tier.people.push(p);
+    });
+
+    tiers.forEach(function (tier) {
+      var label = document.createElement('div');
+      label.className = 'tribute-tier-label';
+      label.textContent = tier.rank + (tier.people.length > 1 ? ' (' + tier.people.length + ')' : '');
+      el.tributeOrganogram.appendChild(label);
+
+      var row = document.createElement('div');
+      row.className = 'tribute-tier-row';
+      tier.people.forEach(function (p) {
+        var card = document.createElement('div');
+        card.className = 'tribute-person';
+        card.innerHTML =
+          '<div class="tribute-person-photo">' +
+            '<svg class="tribute-person-fallback" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>' +
+            '<img src="assets/images/ranks/' + rankSlug(p.rank) + '.png" alt="" onerror="this.remove()" />' +
+          '</div>' +
+          '<span class="tribute-person-name">' + escapeHtml(p.name) + '</span>' +
+          (p.unit ? '<span class="tribute-person-unit">' + escapeHtml(p.unit) + '</span>' : '');
+        row.appendChild(card);
+      });
+      el.tributeOrganogram.appendChild(row);
     });
   }
 
@@ -565,8 +607,8 @@
     el.articleBody = document.getElementById('article-body');
     el.articleFooter = document.getElementById('article-footer');
 
-    el.tributeTableIv = document.getElementById('tribute-table-iv');
-    el.tributeTableV = document.getElementById('tribute-table-v');
+    el.tributeFilterBtns = document.querySelectorAll('.tribute-filter-btn');
+    el.tributeOrganogram = document.getElementById('tribute-organogram');
 
     el.idleOverlay = document.getElementById('idle-overlay');
     el.bgVideo = document.querySelector('.app-bg-video');
@@ -618,6 +660,13 @@
       btn.addEventListener('click', function () {
         state.newsFilter = btn.getAttribute('data-filter');
         renderNewsList();
+      });
+    });
+
+    el.tributeFilterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.tributeFilter = btn.getAttribute('data-filter');
+        renderTribute();
       });
     });
 
