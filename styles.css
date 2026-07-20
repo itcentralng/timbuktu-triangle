@@ -371,7 +371,12 @@ html[dir="rtl"] .stage, .stage[dir="rtl"] { direction: rtl; }
 }
 .tribute-filter-btn.active { background: var(--gold); color: var(--umber-900); border-color: var(--gold); }
 
-.tribute-organogram { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 6px 10px 20px; min-height: 0; }
+.tribute-organogram {
+  flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center;
+  padding: 6px 10px 20px; min-height: 0;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.tribute-organogram::-webkit-scrollbar { display: none; }
 .tribute-tier-label {
   font-family: var(--font-display); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--gold); margin: 18px 0 12px; flex-shrink: 0;
