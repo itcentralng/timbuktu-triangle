@@ -214,7 +214,7 @@ html[dir="rtl"] .stage, .stage[dir="rtl"] { direction: rtl; }
 .menu-tile-icon svg { width: 40px; height: 40px; }
 .menu-tile-icon img {
   position: absolute; inset: 0; margin: auto;
-  width: 44px; height: 44px; object-fit: contain;
+  width: 62px; height: 62px; object-fit: contain;
 }
 .menu-tile-text { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
 .menu-tile-title { font-family: var(--font-display); font-size: 27px; color: var(--sand-100); }
@@ -229,11 +229,7 @@ html[dir="rtl"] .stage, .stage[dir="rtl"] { direction: rtl; }
 .about-progress span.active { background: var(--gold); }
 .about-main { flex: 1; display: flex; flex-direction: row; align-items: center; gap: 56px; overflow: hidden; min-height: 0; }
 .about-map-col { width: 340px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.triangle-map { width: 100%; max-width: 320px; height: auto; }
-.triangle-map-fill { fill: rgba(181,101,29,0.16); }
-.triangle-map-outline { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-dasharray: 6 6; }
-.triangle-map-dot { fill: var(--gold); }
-.triangle-map-label { fill: var(--sand-200); font-size: 15px; font-family: var(--font-display); letter-spacing: 0.05em; }
+.about-map-col img { width: 100%; max-width: 320px; height: auto; }
 .about-text-col { flex: 1; height: 100%; display: flex; align-items: center; min-width: 0; }
 .about-paragraph-wrap { width: 100%; max-height: 100%; overflow-y: auto; }
 .about-paragraph { font-size: 23px; line-height: 1.7; color: var(--sand-200); text-align: start; }
