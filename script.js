@@ -469,10 +469,10 @@
     return i === -1 ? RANK_ORDER.length : i;
   }
 
-  // Used to look up a per-rank silhouette at assets/images/ranks/<slug>.png —
-  // drop images in with these names to replace the built-in placeholder.
-  function rankSlug(rank) {
-    return String(rank).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  // Turns a rank or person's name into a filename-safe slug, e.g.
+  // "Lt Col" -> "lt-col", "TE Alari" -> "te-alari".
+  function slugify(str) {
+    return String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   }
 
   function renderTribute() {
@@ -514,12 +514,17 @@
       var row = document.createElement('div');
       row.className = 'tribute-tier-row';
       tier.people.forEach(function (p) {
+        // Photo cascade: the person's own photo first, falling back to a
+        // per-rank silhouette, then to the generic SVG placeholder if
+        // neither image file exists yet.
+        var personSrc = 'assets/images/people/' + slugify(p.name) + '.png';
+        var rankSrc = 'assets/images/ranks/' + slugify(p.rank) + '.png';
         var card = document.createElement('div');
         card.className = 'tribute-person';
         card.innerHTML =
           '<div class="tribute-person-photo">' +
             '<svg class="tribute-person-fallback" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>' +
-            '<img src="assets/images/ranks/' + rankSlug(p.rank) + '.png" alt="" onerror="this.remove()" />' +
+            '<img src="' + personSrc + '" alt="" onerror="if(!this.dataset.fb){this.dataset.fb=\'1\';this.src=\'' + rankSrc + '\';}else{this.remove();}" />' +
           '</div>' +
           '<span class="tribute-person-name">' + escapeHtml(p.name) + '</span>' +
           (p.unit ? '<span class="tribute-person-unit">' + escapeHtml(p.unit) + '</span>' : '');
