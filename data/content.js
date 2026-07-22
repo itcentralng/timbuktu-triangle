@@ -24,7 +24,7 @@ const TT_CONTENT = {
       menuAbout: 'The Triangle',
       menuAboutSub: 'Understand the ground and the operations',
       menuDocumentary: 'Watch the Documentary',
-      menuDocumentarySub: 'Choose a length that fits your visit',
+      menuDocumentarySub: 'Select a duration according to your available time',
       menuNews: 'In the News',
       menuNewsSub: 'How the operations were reported',
       menuTribute: 'Fallen Heroes',
