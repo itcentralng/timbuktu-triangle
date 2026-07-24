@@ -42,11 +42,14 @@
   // through the roster, both live only while that screen is open.
   var TAPS_SRC = 'assets/audio/taps.mp3';
   var TRIBUTE_SCROLL_SPEED = 0.35; // px per animation frame (~21px/s)
-  var TRIBUTE_SCROLL_START_DELAY = 1500; // ms pause before the scroll begins
+  var TRIBUTE_SCROLL_START_DELAY = 1500; // ms pause before the scroll begins, and at each end of the list
+  var TRIBUTE_SCROLL_RESUME_DELAY = 10000; // ms of no manual scroll before auto-scroll resumes
+  var TRIBUTE_SCROLL_END_EPSILON = 2; // px tolerance for "reached the end" (see stepTributeAutoScroll)
   var tapsAudio = null;
   var tributeDucked = false;
   var tributeScrollTimer = null;
   var tributeScrollRaf = null;
+  var tributeScrollDir = 1; // 1 = scrolling down, -1 = scrolling up
 
   // Minimal fallback so the News section is never empty if data/news-articles.js
   // fails to load for some reason.
@@ -533,6 +536,10 @@
       el.tributeOrganogram.appendChild(row);
     });
 
+    // Clearing and rebuilding innerHTML happens synchronously, so the
+    // browser never reflows in between to clamp scrollTop back down —
+    // it has to be reset explicitly here on every render.
+    el.tributeOrganogram.scrollTop = 0;
     startTributeAutoScroll();
   }
 
@@ -556,28 +563,64 @@
     }
   }
 
+  // Fully stops the auto-scroll with no resume — used when leaving the
+  // Fallen Heroes screen entirely.
   function stopTributeAutoScroll() {
     if (tributeScrollTimer) { clearTimeout(tributeScrollTimer); tributeScrollTimer = null; }
     if (tributeScrollRaf) { cancelAnimationFrame(tributeScrollRaf); tributeScrollRaf = null; }
   }
 
-  // Re-armed on every render (screen entry, filter switch, language change) —
-  // a brief pause lets the visitor take in the top of the list first. Any
-  // manual wheel/touch on the roster cancels it via stopTributeAutoScroll().
-  function startTributeAutoScroll() {
+  function scheduleTributeAutoScroll(delay) {
     stopTributeAutoScroll();
     tributeScrollTimer = setTimeout(function () {
       tributeScrollTimer = null;
       tributeScrollRaf = requestAnimationFrame(stepTributeAutoScroll);
-    }, TRIBUTE_SCROLL_START_DELAY);
+    }, delay);
   }
 
+  // Re-armed on every render (screen entry, filter switch, language change) —
+  // always resumes scrolling downward from the top after a brief pause.
+  function startTributeAutoScroll() {
+    tributeScrollDir = 1;
+    scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+  }
+
+  // Bounces between the top and bottom of the roster — reaching either end
+  // pauses briefly, reverses direction, and continues, indefinitely, for as
+  // long as the visitor stays on this screen.
+  //
+  // The "reached the end" checks use a small tolerance rather than exact
+  // equality: scrollHeight/clientHeight are rounded readouts, so the
+  // browser's true scrollable maximum can sit a fraction of a pixel below
+  // what we compute here. Requiring an exact match against that computed
+  // max would let the position get clamped just short of it forever,
+  // stalling the loop instead of reversing.
   function stepTributeAutoScroll() {
     var org = el.tributeOrganogram;
     var max = org.scrollHeight - org.clientHeight;
-    if (org.scrollTop >= max) { tributeScrollRaf = null; return; }
-    org.scrollTop += TRIBUTE_SCROLL_SPEED;
+    var next = org.scrollTop + TRIBUTE_SCROLL_SPEED * tributeScrollDir;
+
+    if (tributeScrollDir > 0 && next >= max - TRIBUTE_SCROLL_END_EPSILON) {
+      tributeScrollDir = -1;
+      scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+      return;
+    }
+    if (tributeScrollDir < 0 && next <= TRIBUTE_SCROLL_END_EPSILON) {
+      tributeScrollDir = 1;
+      scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+      return;
+    }
+
+    org.scrollTop = next;
     tributeScrollRaf = requestAnimationFrame(stepTributeAutoScroll);
+  }
+
+  // Any manual wheel/touch on the roster pauses the auto-scroll, then
+  // resumes it (from wherever it was left, in whichever direction it was
+  // heading) after a period of no further interaction — each new
+  // interaction pushes the resume back out.
+  function handleTributeManualScroll() {
+    scheduleTributeAutoScroll(TRIBUTE_SCROLL_RESUME_DELAY);
   }
 
   /* ---------------- IDLE / ATTRACT RESET ---------------- */
@@ -728,10 +771,10 @@
       });
     });
 
-    // Any manual wheel/touch on the roster hands scroll control to the
-    // visitor for the rest of this view (see startTributeAutoScroll()).
+    // Any manual wheel/touch on the roster pauses auto-scroll; it resumes
+    // on its own after a quiet period (see handleTributeManualScroll()).
     ['wheel', 'touchstart'].forEach(function (evt) {
-      el.tributeOrganogram.addEventListener(evt, stopTributeAutoScroll, { passive: true });
+      el.tributeOrganogram.addEventListener(evt, handleTributeManualScroll, { passive: true });
     });
 
     ['click', 'touchstart'].forEach(function (evt) {

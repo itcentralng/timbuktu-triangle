@@ -29,7 +29,8 @@
       "Read(//tmp/**)",
       "Bash(rm -f /tmp/tc_cookies.txt)",
       "Bash(curl -s -c /tmp/tc_cookies.txt -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -o /dev/null https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/)",
-      "Bash(curl -s -b /tmp/tc_cookies.txt -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -H 'Referer: https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/' -o /tmp/tc_img.bin -w 'code:%{http_code} size:%{size_download}\\\\n' https://www.thecable.ng/wp-content/uploads/2024/04/soldiers-troops-army-e1622629206152.webp)"
+      "Bash(curl -s -b /tmp/tc_cookies.txt -A 'Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36' -H 'Referer: https://www.thecable.ng/nigerian-army-loses-20-soldiers-kills-70-terrorists-during-military-operation-in-borno/' -o /tmp/tc_img.bin -w 'code:%{http_code} size:%{size_download}\\\\n' https://www.thecable.ng/wp-content/uploads/2024/04/soldiers-troops-army-e1622629206152.webp)",
+      "Bash(node --check script.js)"
     ]
   }
 }
