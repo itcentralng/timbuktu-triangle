@@ -49,7 +49,7 @@ const TT_CONTENT = {
       sourceLabel: 'Originally published by',
       readOriginal: 'Original source',
       fetchFailedNote: 'Full text unavailable offline for this article.',
-      tributeIntro: 'The Nigerian Army honours the officers, soldiers and Civilian Joint Task Force members who were killed in action eliminating insurgents from the Timbuktu Triangle.',
+      tributeIntro: 'The Nigerian Army honours its officers, soldiers and members of the Civilian Joint Task Force who paid the supreme sacrifice during operations against insurgents in the Timbuktu Triangle.',
       tributeIV: 'OP Desert Sanity IV - 24 Jan 2025',
       tributeV: 'OP Desert Sanity V - 20 January 2026',
       rank: 'Rank',
