@@ -132,6 +132,21 @@
                 <span class="menu-tile-sub" data-i18n="menuTributeSub"></span>
               </span>
             </button>
+            <button class="menu-tile menu-tile--team" data-nav="team">
+              <span class="menu-tile-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="8" cy="8" r="3" />
+                  <circle cx="16" cy="8" r="3" />
+                  <path d="M2.5 20c0-3.6 2.6-6 5.5-6s5.5 2.4 5.5 6" />
+                  <path d="M12.8 14.3c.5-.2 1.1-.3 1.7-.3 2.9 0 5.5 2.4 5.5 6" />
+                </svg>
+                <img src="assets/icons/team.png" alt="" onerror="this.remove()" />
+              </span>
+              <span class="menu-tile-text">
+                <span class="menu-tile-title" data-i18n="menuTeam"></span>
+                <span class="menu-tile-sub" data-i18n="menuTeamSub"></span>
+              </span>
+            </button>
           </nav>
         </section>
 
@@ -244,6 +259,26 @@
           </div>
         </section>
 
+        <!-- TEAM -->
+        <section class="screen" id="screen-team">
+          <div class="team-wrap">
+            <div class="team-header">
+              <div class="team-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="8" cy="8" r="3" />
+                  <circle cx="16" cy="8" r="3" />
+                  <path d="M2.5 20c0-3.6 2.6-6 5.5-6s5.5 2.4 5.5 6" />
+                  <path d="M12.8 14.3c.5-.2 1.1-.3 1.7-.3 2.9 0 5.5 2.4 5.5 6" />
+                </svg>
+                <img src="assets/icons/team.png" alt="" onerror="this.remove()" />
+              </div>
+              <h2 class="team-title" data-i18n="menuTeam"></h2>
+              <p class="team-intro" data-i18n="teamIntro"></p>
+            </div>
+            <div class="team-organogram" id="team-organogram"></div>
+          </div>
+        </section>
+
       </main>
 
       <!-- ============ VIDEO PLAYER OVERLAY ============ -->
@@ -275,6 +310,7 @@
 
   <script src="data/content.js"></script>
   <script src="data/kia.js"></script>
+  <script src="data/team.js"></script>
   <script src="data/news-articles.js"></script>
   <script src="data/outlet-logos.js"></script>
   <script src="script.js"></script>

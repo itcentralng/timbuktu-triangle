@@ -39,17 +39,24 @@
   var videoDucked = false;
 
   // Fallen Heroes page: a looping taps.mp3 bed plus a slow auto-scroll
-  // through the roster, both live only while that screen is open.
+  // through the roster, both live only while that screen is open. The
+  // AUTO_SCROLL_* tuning constants are shared with the Team page's
+  // auto-scroll below, so both rosters feel identical to scroll through —
+  // but the timer/raf/direction state itself must stay independent per
+  // screen (a visitor could navigate between the two).
   var TAPS_SRC = 'assets/audio/taps.mp3';
-  var TRIBUTE_SCROLL_SPEED = 0.35; // px per animation frame (~21px/s)
-  var TRIBUTE_SCROLL_START_DELAY = 1500; // ms pause before the scroll begins, and at each end of the list
-  var TRIBUTE_SCROLL_RESUME_DELAY = 10000; // ms of no manual scroll before auto-scroll resumes
-  var TRIBUTE_SCROLL_END_EPSILON = 2; // px tolerance for "reached the end" (see stepTributeAutoScroll)
+  var AUTO_SCROLL_SPEED = 0.35; // px per animation frame (~21px/s)
+  var AUTO_SCROLL_START_DELAY = 1500; // ms pause before the scroll begins, and at each end of the list
+  var AUTO_SCROLL_RESUME_DELAY = 10000; // ms of no manual scroll before auto-scroll resumes
+  var AUTO_SCROLL_END_EPSILON = 2; // px tolerance for "reached the end" (see stepTributeAutoScroll)
   var tapsAudio = null;
   var tributeDucked = false;
   var tributeScrollTimer = null;
   var tributeScrollRaf = null;
   var tributeScrollDir = 1; // 1 = scrolling down, -1 = scrolling up
+  var teamScrollTimer = null;
+  var teamScrollRaf = null;
+  var teamScrollDir = 1; // 1 = scrolling down, -1 = scrolling up
 
   // Minimal fallback so the News section is never empty if data/news-articles.js
   // fails to load for some reason.
@@ -123,6 +130,7 @@
     stopWelcomeAudio();
     stopTapsAudio();
     stopTributeAutoScroll();
+    stopTeamAutoScroll();
     Object.keys(el.screens).forEach(function (key) {
       el.screens[key].classList.toggle('active', key === id);
     });
@@ -134,6 +142,7 @@
     if (id === 'documentary') renderDocList();
     if (id === 'news') ensureNewsLoaded(renderNewsList);
     if (id === 'tribute') { startTapsAudio(); renderTribute(); }
+    if (id === 'team') renderTeam();
   }
 
   function goHome() { showScreen('home'); }
@@ -213,6 +222,7 @@
     if (state.screen === 'documentary') renderDocList();
     if (state.screen === 'news') renderNewsList();
     if (state.screen === 'tribute') renderTribute();
+    if (state.screen === 'team') renderTeam();
     if (state.screen === 'article' && state.currentArticle) openArticle(state.currentArticle);
   }
 
@@ -582,7 +592,7 @@
   // always resumes scrolling downward from the top after a brief pause.
   function startTributeAutoScroll() {
     tributeScrollDir = 1;
-    scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+    scheduleTributeAutoScroll(AUTO_SCROLL_START_DELAY);
   }
 
   // Bounces between the top and bottom of the roster — reaching either end
@@ -598,16 +608,16 @@
   function stepTributeAutoScroll() {
     var org = el.tributeOrganogram;
     var max = org.scrollHeight - org.clientHeight;
-    var next = org.scrollTop + TRIBUTE_SCROLL_SPEED * tributeScrollDir;
+    var next = org.scrollTop + AUTO_SCROLL_SPEED * tributeScrollDir;
 
-    if (tributeScrollDir > 0 && next >= max - TRIBUTE_SCROLL_END_EPSILON) {
+    if (tributeScrollDir > 0 && next >= max - AUTO_SCROLL_END_EPSILON) {
       tributeScrollDir = -1;
-      scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+      scheduleTributeAutoScroll(AUTO_SCROLL_START_DELAY);
       return;
     }
-    if (tributeScrollDir < 0 && next <= TRIBUTE_SCROLL_END_EPSILON) {
+    if (tributeScrollDir < 0 && next <= AUTO_SCROLL_END_EPSILON) {
       tributeScrollDir = 1;
-      scheduleTributeAutoScroll(TRIBUTE_SCROLL_START_DELAY);
+      scheduleTributeAutoScroll(AUTO_SCROLL_START_DELAY);
       return;
     }
 
@@ -620,18 +630,115 @@
   // heading) after a period of no further interaction — each new
   // interaction pushes the resume back out.
   function handleTributeManualScroll() {
-    scheduleTributeAutoScroll(TRIBUTE_SCROLL_RESUME_DELAY);
+    scheduleTributeAutoScroll(AUTO_SCROLL_RESUME_DELAY);
+  }
+
+  /* ---------------- TEAM ---------------- */
+  function renderTeam() {
+    el.teamOrganogram.innerHTML = '';
+
+    // Pyramid layout: chunk the ordered roster into rows sized by
+    // TT_TEAM.rowSizes (1, 2, 4, 5) rather than one row per title, since a
+    // couple of rows span more than one role.
+    var people = TT_TEAM.people.slice();
+    TT_TEAM.rowSizes.forEach(function (size) {
+      var rowPeople = people.splice(0, size);
+      var row = document.createElement('div');
+      row.className = 'team-tier-row';
+      rowPeople.forEach(function (p) {
+        // Photo cascade: the person's own photo, falling straight to the
+        // generic silhouette SVG — Team has no per-rank fallback tier
+        // (unlike Fallen Heroes' 7-rank silhouette set), since it's only
+        // 12 people with mostly unique roles.
+        var personSrc = 'assets/images/team/' + slugify(p.name) + '.png';
+        var card = document.createElement('div');
+        card.className = 'team-person';
+        card.innerHTML =
+          '<div class="team-person-photo">' +
+            '<svg class="team-person-fallback" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>' +
+            '<img src="' + personSrc + '" alt="" onerror="this.remove()" />' +
+          '</div>' +
+          '<span class="team-person-name">' + escapeHtml(p.rank + ' ' + p.name) + '</span>' +
+          (p.title ? '<span class="team-person-title">' + escapeHtml(p.title) + '</span>' : '') +
+          (p.quals ? '<span class="team-person-quals">' + escapeHtml(p.quals) + '</span>' : '');
+        row.appendChild(card);
+      });
+      el.teamOrganogram.appendChild(row);
+    });
+
+    // Same fix as Tribute needed: clearing+rebuilding innerHTML happens
+    // synchronously, so the browser never reflows in between to clamp
+    // scrollTop back down — reset it explicitly.
+    el.teamOrganogram.scrollTop = 0;
+    startTeamAutoScroll();
+  }
+
+  // Fully stops the auto-scroll with no resume — used when leaving the
+  // Team screen entirely.
+  function stopTeamAutoScroll() {
+    if (teamScrollTimer) { clearTimeout(teamScrollTimer); teamScrollTimer = null; }
+    if (teamScrollRaf) { cancelAnimationFrame(teamScrollRaf); teamScrollRaf = null; }
+  }
+
+  function scheduleTeamAutoScroll(delay) {
+    stopTeamAutoScroll();
+    teamScrollTimer = setTimeout(function () {
+      teamScrollTimer = null;
+      teamScrollRaf = requestAnimationFrame(stepTeamAutoScroll);
+    }, delay);
+  }
+
+  // Re-armed on every render (screen entry, language change) — always
+  // resumes scrolling downward from the top after a brief pause.
+  function startTeamAutoScroll() {
+    teamScrollDir = 1;
+    scheduleTeamAutoScroll(AUTO_SCROLL_START_DELAY);
+  }
+
+  // Bounces between the top and bottom of the roster — reaching either end
+  // pauses briefly, reverses direction, and continues, indefinitely, for as
+  // long as the visitor stays on this screen. See stepTributeAutoScroll for
+  // why the "reached the end" checks use a small tolerance rather than
+  // exact equality.
+  function stepTeamAutoScroll() {
+    var org = el.teamOrganogram;
+    var max = org.scrollHeight - org.clientHeight;
+    var next = org.scrollTop + AUTO_SCROLL_SPEED * teamScrollDir;
+
+    if (teamScrollDir > 0 && next >= max - AUTO_SCROLL_END_EPSILON) {
+      teamScrollDir = -1;
+      scheduleTeamAutoScroll(AUTO_SCROLL_START_DELAY);
+      return;
+    }
+    if (teamScrollDir < 0 && next <= AUTO_SCROLL_END_EPSILON) {
+      teamScrollDir = 1;
+      scheduleTeamAutoScroll(AUTO_SCROLL_START_DELAY);
+      return;
+    }
+
+    org.scrollTop = next;
+    teamScrollRaf = requestAnimationFrame(stepTeamAutoScroll);
+  }
+
+  // Any manual wheel/touch on the roster pauses the auto-scroll, then
+  // resumes it (from wherever it was left, in whichever direction it was
+  // heading) after a period of no further interaction — each new
+  // interaction pushes the resume back out.
+  function handleTeamManualScroll() {
+    scheduleTeamAutoScroll(AUTO_SCROLL_RESUME_DELAY);
   }
 
   /* ---------------- IDLE / ATTRACT RESET ---------------- */
   // Actively listening to About narration, watching the documentary, or
-  // taking in the Fallen Heroes roster (taps + auto-scroll) counts as
-  // activity even without touching the screen, so the idle timer should
-  // not run while any of them is actually playing.
-  function isNarrationOrVideoPlaying() {
+  // auto-scrolling through Fallen Heroes / The Team counts as activity
+  // even without touching the screen, so the idle timer should not run
+  // while any of them is actually happening.
+  function isIdleExempt() {
     if (aboutAudio && !aboutAudio.paused) return true;
     if (!el.videoOverlay.classList.contains('hidden') && !el.videoPlayer.paused) return true;
     if (tapsAudio && !tapsAudio.paused) return true;
+    if (tributeScrollTimer || tributeScrollRaf) return true;
+    if (teamScrollTimer || teamScrollRaf) return true;
     return false;
   }
 
@@ -642,7 +749,7 @@
   function resetIdleTimer() {
     pauseIdleTimer();
     if (state.screen === 'attract') return;
-    if (isNarrationOrVideoPlaying()) return;
+    if (isIdleExempt()) return;
     idleTimer = setTimeout(triggerIdleReset, IDLE_TIMEOUT_MS);
   }
 
@@ -672,7 +779,8 @@
       documentary: document.getElementById('screen-documentary'),
       news: document.getElementById('screen-news'),
       article: document.getElementById('screen-article'),
-      tribute: document.getElementById('screen-tribute')
+      tribute: document.getElementById('screen-tribute'),
+      team: document.getElementById('screen-team')
     };
 
     el.aboutTitle = document.getElementById('about-title');
@@ -710,6 +818,8 @@
 
     el.tributeFilterBtns = document.querySelectorAll('.tribute-filter-btn');
     el.tributeOrganogram = document.getElementById('tribute-organogram');
+
+    el.teamOrganogram = document.getElementById('team-organogram');
 
     el.idleOverlay = document.getElementById('idle-overlay');
     el.bgVideo = document.querySelector('.app-bg-video');
@@ -775,6 +885,7 @@
     // on its own after a quiet period (see handleTributeManualScroll()).
     ['wheel', 'touchstart'].forEach(function (evt) {
       el.tributeOrganogram.addEventListener(evt, handleTributeManualScroll, { passive: true });
+      el.teamOrganogram.addEventListener(evt, handleTeamManualScroll, { passive: true });
     });
 
     ['click', 'touchstart'].forEach(function (evt) {
