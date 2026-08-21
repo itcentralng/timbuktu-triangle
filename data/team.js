@@ -25,7 +25,7 @@ const TT_TEAM = {
     { rank: 'Brig Gen', name: 'Olokor (Rtd)' },
     { rank: 'Lt', name: 'A Umar', title: 'Narrator' },
     { rank: 'Mr', name: 'Faithman', title: 'Artisan' },
-    { rank: 'Engr', name: 'Paul Ifediora Nwakacha', title: 'Software Engineer' },
+    { rank: 'Engr', name: 'Ifediora Paul Nwakacha', title: 'Software Engineer' },
     { rank: 'Mr', name: 'Yakubu Gaza', title: 'Video Editor' }
   ]
 };
