@@ -23,7 +23,7 @@ const TT_TEAM = {
     { rank: 'Lt Col', name: 'A Idris', title: 'CO', role: '199 SF Bn' },
     { rank: 'Col', name: 'I Manga', title: 'CO', role: 'AHQ Intervention Force' },
 
-    { rank: 'Brig Gen', name: 'OL Olokor (Rtd) PhD', title: 'Consultant', role: 'NA Museum' },
+    { rank: 'Brig Gen', name: 'OL Olokor Rtd PhD', title: 'Consultant', role: 'NA Museum', quals: 'DSS MSS FSS FCM SJM GJM MTRCN FNARC FCILG' },
     { rank: 'Lt', name: 'A Umar', title: 'Narrator' },
     { rank: 'Mr', name: 'Faithman', title: 'Artisan' },
     { rank: 'Engr', name: 'Ifediora Paul Nwakacha', title: 'Software Engineer' },
