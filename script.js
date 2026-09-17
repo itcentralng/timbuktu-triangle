@@ -638,7 +638,7 @@
     el.teamOrganogram.innerHTML = '';
 
     // Pyramid layout: chunk the ordered roster into rows sized by
-    // TT_TEAM.rowSizes (1, 2, 4, 5) rather than one row per title, since a
+    // TT_TEAM.rowSizes (1, 2, 5, 5) rather than one row per title, since a
     // couple of rows span more than one role.
     var people = TT_TEAM.people.slice();
     TT_TEAM.rowSizes.forEach(function (size) {
@@ -660,7 +660,8 @@
           '</div>' +
           '<span class="team-person-name">' + escapeHtml(p.rank + ' ' + p.name) + '</span>' +
           (p.title ? '<span class="team-person-title">' + escapeHtml(p.title) + '</span>' : '') +
-          (p.quals ? '<span class="team-person-quals">' + escapeHtml(p.quals) + '</span>' : '');
+          (p.quals ? '<span class="team-person-quals">' + escapeHtml(p.quals) + '</span>' : '') +
+          (p.role ? '<span class="team-person-role">' + escapeHtml(p.role) + '</span>' : '');
         row.appendChild(card);
       });
       el.teamOrganogram.appendChild(row);
